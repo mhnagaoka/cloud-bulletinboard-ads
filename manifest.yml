@@ -1,6 +1,7 @@
 ---
 applications:
 - name: bulletinboard-ads
+  host: bulletinboard-ads-d012345
   memory: 800M
   path: target/bulletinboard-ads.war
   buildpack: https://github.com/cloudfoundry/java-buildpack.git#v4.6
@@ -18,3 +19,21 @@ applications:
   - postgres-bulletinboard-ads
   - applogs-bulletinboard
   - mq-bulletinboard
+
+- name: approuter
+  host: approuter-d012345
+  path: src/main/approuter
+  buildpack: https://github.com/cloudfoundry/nodejs-buildpack.git#v1.6.10
+  memory: 128M
+  env:
+    XSAPPNAME: bulletinboard-d012345
+    TENANT_HOST_PATTERN: "^(.*)-approuter-d012345.cfapps.sap.hana.ondemand.com"
+    destinations: >
+      [{
+         "name":"ads-destination",
+         "url" :"https://bulletinboard-ads-d012345.cfapps.sap.hana.ondemand.com",
+         "forwardAuthToken": true}
+      ]
+  services:
+    - applogs-bulletinboard
+    - uaa-bulletinboard
