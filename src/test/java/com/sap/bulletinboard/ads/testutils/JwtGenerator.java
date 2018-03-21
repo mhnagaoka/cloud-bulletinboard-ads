@@ -29,7 +29,7 @@ public class JwtGenerator {
         root.put("exp", Integer.MAX_VALUE);
         root.set("scope", getScopesJSON(scopes));
         root.put("user_name", "user name");
-        root.put("user_id", "d012345");
+        root.put("user_id", "<<your-user-id>>");
         root.put("email", "testUser@testOrg");
         root.put("zid", IDENTITY_ZONE_ID);
 
