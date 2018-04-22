@@ -66,7 +66,7 @@ public class AdvertisementControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.value[*].title", hasItem(SOME_TITLE + "ReadAll")))
-                .andExpect(jsonPath("$.value.length()", both(greaterThan(0)).and(lessThan(2))));
+                .andExpect(jsonPath("$.value.length()", both(greaterThan(0)).and(lessThan(10))));
     }
 
     @Test
