@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -35,6 +36,7 @@ import com.sap.bulletinboard.ads.models.Advertisement;
 @RequestMapping(path = AdvertisementController.PATH, produces = { "application/json" })
 public class AdvertisementController {
     public static final String PATH = "/api/v1/ads";
+    private static final AtomicLong ID = new AtomicLong(0L);
     private static final Map<Long, Advertisement> ads = new HashMap<>(); // temporary data storage, key represents the ID
 
     @GetMapping
@@ -59,7 +61,7 @@ public class AdvertisementController {
             UriComponentsBuilder uriComponentsBuilder) {
 
         try {
-            Long id = new Long(ads.size());
+            Long id = ID.getAndAdd(1L);
             ads.put(id, advertisement);
 
             UriComponents uriComponents = uriComponentsBuilder.path(PATH + "/{id}").buildAndExpand(id);
