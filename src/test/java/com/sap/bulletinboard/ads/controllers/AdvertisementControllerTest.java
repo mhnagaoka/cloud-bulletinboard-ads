@@ -70,6 +70,12 @@ public class AdvertisementControllerTest {
     }
 
     @Test
+    public void readByIdInvalid() throws Exception {
+        mockMvc.perform(buildGetRequest("-1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void readByIdNotFound() throws Exception {
         // try to retrieve object with nonexisting ID using GET request to /4711
         mockMvc.perform(buildGetRequest("4711"))
