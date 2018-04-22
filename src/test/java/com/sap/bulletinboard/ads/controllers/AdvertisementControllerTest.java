@@ -32,7 +32,7 @@ import com.sap.bulletinboard.ads.models.Advertisement;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { WebAppContextConfig.class })
 @WebAppConfiguration
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 //@formatter:off
 public class AdvertisementControllerTest {
     
