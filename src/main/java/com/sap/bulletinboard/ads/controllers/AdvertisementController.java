@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
 import org.springframework.http.HttpHeaders;
@@ -54,7 +55,7 @@ public class AdvertisementController {
      *              content type.
      */
     @PostMapping
-    public ResponseEntity<Advertisement> add(@RequestBody Advertisement advertisement,
+    public ResponseEntity<Advertisement> add(@RequestBody @Valid Advertisement advertisement,
             UriComponentsBuilder uriComponentsBuilder) {
 
         try {
@@ -74,7 +75,7 @@ public class AdvertisementController {
     }
     
     @PutMapping(path = "/{id}", produces = "application/json")
-    public Advertisement updateById(@PathVariable("id") Long id, @RequestBody Advertisement updatedAdvertisement) {
+    public Advertisement updateById(@PathVariable("id") Long id, @RequestBody @Valid Advertisement updatedAdvertisement) {
         if (ads.containsKey(id)) {
             ads.put(id, updatedAdvertisement);
             return updatedAdvertisement;

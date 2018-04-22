@@ -59,6 +59,18 @@ public class AdvertisementControllerTest {
     }
 
     @Test
+    public void createEmptyTitleShouldFail() throws Exception {
+        mockMvc.perform(buildPostRequest(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void createNullTitleShouldFail() throws Exception {
+        mockMvc.perform(buildPostRequest(null))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void readAll() throws Exception {
         mockMvc.perform(buildPostRequest(SOME_TITLE + "ReadAll"))
                 .andExpect(status().isCreated());
@@ -112,7 +124,30 @@ public class AdvertisementControllerTest {
                 .andExpect(jsonPath("$.title", is(SOME_TITLE + "AfterUpdateById"))); // requires com.jayway.jsonpath:json-path
     }
 
-    
+    @Test
+    public void updateByIdEmptyTitleShouldFail() throws Exception {
+        String location = mockMvc.perform(buildPostRequest(SOME_TITLE + "BeforeUpdateByIdEmptyTitle"))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getHeader(LOCATION);
+        String id = getIdFromLocation(location);
+        mockMvc.perform(buildPutRequest(id, ""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void updateByIdNullTitleShouldFail() throws Exception {
+        String location = mockMvc.perform(buildPostRequest(SOME_TITLE + "BeforeUpdateByIdNullTitle"))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getHeader(LOCATION);
+        String id = getIdFromLocation(location);
+        mockMvc.perform(buildPutRequest(id, null))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test
     public void updateByIdNotFound() throws Exception {
         mockMvc.perform(buildPutRequest("-4711", "AfterUpdateNotFound"))
@@ -120,7 +155,7 @@ public class AdvertisementControllerTest {
     }
 
     @Test
-    public void updateAllAdsNotSupportede() throws Exception {
+    public void updateAllAdsNotSupported() throws Exception {
         mockMvc.perform(buildPutRequest("", "AfterUpdateNotFound"))
                 .andExpect(status().isMethodNotAllowed());
     }
