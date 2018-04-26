@@ -1,6 +1,8 @@
 ---
 applications:
 - name: bulletinboard-ads
+  health-check-type: http
+  health-check-http-endpoint: /health
   memory: 1G
   path: target/bulletinboard-ads.war
   buildpack: https://github.com/cloudfoundry/java-buildpack.git#v4.9
