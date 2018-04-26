@@ -3,11 +3,9 @@ package com.sap.bulletinboard.ads.controllers;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
@@ -29,6 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.bulletinboard.ads.models.Advertisement;
+import com.sap.bulletinboard.ads.models.AdvertisementRepository;
 
 @Validated
 @RequestScope
@@ -36,18 +35,24 @@ import com.sap.bulletinboard.ads.models.Advertisement;
 @RequestMapping(path = AdvertisementController.PATH, produces = { "application/json" })
 public class AdvertisementController {
     public static final String PATH = "/api/v1/ads";
-    private static final AtomicLong ID = new AtomicLong(0L);
-    private static final Map<Long, Advertisement> ads = new HashMap<>(); // temporary data storage, key represents the ID
+
+    private AdvertisementRepository advertisementRepository;
+    
+    @Inject
+    public AdvertisementController(AdvertisementRepository advertisementRepository) {
+        this.advertisementRepository = advertisementRepository;
+    }
 
     @GetMapping
     public AdvertisementList advertisements() {
-        return new AdvertisementList(ads.values());
+        return new AdvertisementList(advertisementRepository.findAll());
     }
 
     @GetMapping("/{id}")
     public Advertisement advertisementById(@Min(0) @PathVariable("id") Long id) {
-        if (ads.containsKey(id)) {
-            return ads.get(id);
+        Advertisement ad = advertisementRepository.findOne(id);
+        if (ad != null) {
+            return ad;
         }
         throw new NotFoundException("No such ad: " + id);
     }
@@ -61,10 +66,15 @@ public class AdvertisementController {
             UriComponentsBuilder uriComponentsBuilder) {
 
         try {
-            Long id = ID.getAndAdd(1L);
-            ads.put(id, advertisement);
+            
+            if (advertisement.getId() != null) {
+                String message = String
+                        .format("Remove 'id' property from request or use PUT method to update resource with id = %d", advertisement.getId());
+                throw new BadRequestException(message);
+            }
+            Advertisement savedAd = advertisementRepository.save(advertisement);
 
-            UriComponents uriComponents = uriComponentsBuilder.path(PATH + "/{id}").buildAndExpand(id);
+            UriComponents uriComponents = uriComponentsBuilder.path(PATH + "/{id}").buildAndExpand(savedAd.getId());
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(new URI(uriComponents.getPath()));
 
@@ -78,17 +88,22 @@ public class AdvertisementController {
     
     @PutMapping(path = "/{id}", produces = "application/json")
     public Advertisement updateById(@PathVariable("id") Long id, @RequestBody @Valid Advertisement updatedAdvertisement) {
-        if (ads.containsKey(id)) {
-            ads.put(id, updatedAdvertisement);
-            return updatedAdvertisement;
+        if (updatedAdvertisement.getId() != null && !updatedAdvertisement.getId().equals(id)) {
+            String message = String
+                    .format("Remove 'id' property from request make it match the resource URI with id = %d", id);
+            throw new BadRequestException(message);
         }
-        throw new NotFoundException("No such id: " + id);
+        if (!advertisementRepository.exists(id)) {
+            throw new NotFoundException("No such id: " + id);
+        }
+        updatedAdvertisement.setId(id);
+        return advertisementRepository.save(updatedAdvertisement);
     }
     
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable("id") Long id) {
-        if (ads.containsKey(id)) {
-            ads.remove(id);
+        if (advertisementRepository.exists(id)) {
+            advertisementRepository.delete(id);
             return;
         }
         throw new NotFoundException("No such id: " + id);
@@ -96,7 +111,7 @@ public class AdvertisementController {
 
     @DeleteMapping
     public void deleteAll() {
-        ads.clear();
+        advertisementRepository.deleteAll();
     }
 
     public static class AdvertisementList {

@@ -21,6 +21,10 @@ public class Advertisement {
     @NotBlank
     private String title;
 
+    public Long getId() {
+        return id;
+    }
+
     public String getTitle() {
         return title;
     }
