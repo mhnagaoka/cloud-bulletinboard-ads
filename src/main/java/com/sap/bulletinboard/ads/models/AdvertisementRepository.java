@@ -2,6 +2,8 @@ package com.sap.bulletinboard.ads.models;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface AdvertisementRepository extends AdvertisementRepositoryCustom, PagingAndSortingRepository<Advertisement, Long> {
+import java.util.List;
 
+public interface AdvertisementRepository extends PagingAndSortingRepository<Advertisement, Long> {
+    List<Advertisement> findByTitle(String title);
 }
