@@ -76,4 +76,16 @@ public class AdvertisementRepositoryTest {
 
         repo.save(entity); // tries to persist entity with outdated version
     }
+
+    @Test
+    public void shouldFindByTitle() {
+        Advertisement entity = new Advertisement();
+        String title = "Find me";
+
+        entity.setTitle(title);
+        repo.save(entity);
+
+        Advertisement foundEntity = repo.findByTitle(title).get(0);
+        assertThat(foundEntity.getTitle(), is(title));
+    }
 }
