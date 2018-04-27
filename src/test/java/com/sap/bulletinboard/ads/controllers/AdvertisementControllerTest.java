@@ -181,7 +181,7 @@ public class AdvertisementControllerTest {
                 .getHeader(LOCATION);
         String id = getIdFromLocation(location);
         mockMvc.perform(buildDeleteRequest(id))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -193,7 +193,7 @@ public class AdvertisementControllerTest {
     @Test
     public void deleteAll() throws Exception {
         mockMvc.perform(buildDeleteRequest(""))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     private MockHttpServletRequestBuilder buildPostRequest(String adsTitle) throws Exception {

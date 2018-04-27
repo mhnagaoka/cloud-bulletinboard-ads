@@ -98,6 +98,7 @@ public class AdvertisementController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable("id") Long id) {
         if (advertisementRepository.exists(id)) {
             advertisementRepository.delete(id);
@@ -107,6 +108,7 @@ public class AdvertisementController {
     }
 
     @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAll() {
         advertisementRepository.deleteAll();
     }
