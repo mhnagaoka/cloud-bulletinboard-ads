@@ -125,7 +125,9 @@ public class AdvertisementController {
             linkHeader.append(String.format("<%s?pageId=%d&pageSize=%d>;rel=\"next\"", path, nextNumber, pageSize));
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.LINK, linkHeader.toString());
+        if (linkHeader.length() > 0) {
+            headers.add(HttpHeaders.LINK, linkHeader.toString());
+        }
         return headers;
     }
 
