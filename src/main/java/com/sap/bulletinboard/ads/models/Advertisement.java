@@ -19,8 +19,10 @@ public class Advertisement {
     @NotBlank
     private String title;
 
+    @Column(updatable = false)
     private Timestamp createdAt;
 
+    @Column(insertable = false)
     private Timestamp updatedAt;
 
     @Version
