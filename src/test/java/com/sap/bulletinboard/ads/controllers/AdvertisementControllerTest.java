@@ -206,6 +206,7 @@ public class AdvertisementControllerTest {
 
     private MockHttpServletRequestBuilder buildPutRequest(String id, String adsTitle) throws Exception {
         Advertisement advertisement = new Advertisement();
+        advertisement.setVersion(1L);
         advertisement.setTitle(adsTitle);
 
         // post the advertisement as a JSON entity in the request body
