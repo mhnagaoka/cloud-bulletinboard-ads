@@ -150,8 +150,20 @@ public class AdvertisementControllerTest {
 
     @Test
     public void updateByIdNotFound() throws Exception {
-        mockMvc.perform(buildPutRequest("-4711", "AfterUpdateNotFound"))
+        mockMvc.perform(buildPutRequest("4711", "AfterUpdateNotFound"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void updateByIdInconsistentIdShouldFail() throws Exception {
+        String location = mockMvc.perform(buildPostRequest(SOME_TITLE + "BeforeUpdateByIdInconsistentId"))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getHeader(LOCATION);
+        String id = getIdFromLocation(location);
+        mockMvc.perform(buildInconsistentPutRequest(id, "AfterUpdateByIdInconsistentId"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -194,6 +206,16 @@ public class AdvertisementControllerTest {
 
     private MockHttpServletRequestBuilder buildPutRequest(String id, String adsTitle) throws Exception {
         Advertisement advertisement = new Advertisement();
+        advertisement.setTitle(adsTitle);
+
+        // post the advertisement as a JSON entity in the request body
+        return put(AdvertisementController.PATH + "/" + id)
+                .content(toJson(advertisement)).contentType(APPLICATION_JSON_UTF8);
+    }
+
+    private MockHttpServletRequestBuilder buildInconsistentPutRequest(String id, String adsTitle) throws Exception {
+        Advertisement advertisement = new Advertisement();
+        advertisement.setId(Long.parseLong(id) + 10L); // id in the body is inconsistent with id in the URI
         advertisement.setTitle(adsTitle);
 
         // post the advertisement as a JSON entity in the request body
