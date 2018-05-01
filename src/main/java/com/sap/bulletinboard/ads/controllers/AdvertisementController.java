@@ -3,9 +3,7 @@ package com.sap.bulletinboard.ads.controllers;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.bulletinboard.ads.models.Advertisement;
 import com.sap.bulletinboard.ads.models.AdvertisementRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.slf4j.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +30,7 @@ import java.util.List;
 @RequestMapping(path = AdvertisementController.PATH, produces = {"application/json"})
 public class AdvertisementController {
     public static final String PATH = "/api/v1/ads";
+    public static final Marker technicalMarker = MarkerFactory.getMarker("TECHNICAL");
 
     private AdvertisementRepository advertisementRepository;
     Logger logger = LoggerFactory.getLogger(getClass());
@@ -78,9 +77,9 @@ public class AdvertisementController {
                         .format("Remove 'id' property from request or use PUT method to update resource with id = %d", advertisement.getId());
                 throw new BadRequestException(message);
             }
-            Advertisement savedAd = advertisementRepository.save(advertisement);
-
-            UriComponents uriComponents = uriComponentsBuilder.path(PATH + "/{id}").buildAndExpand(savedAd.getId());
+            Advertisement createdAd = advertisementRepository.save(advertisement);
+            logger.info(technicalMarker, "Created advertisement, version {}", createdAd.getVersion());
+            UriComponents uriComponents = uriComponentsBuilder.path(PATH + "/{id}").buildAndExpand(createdAd.getId());
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(new URI(uriComponents.getPath()));
 
@@ -93,8 +92,8 @@ public class AdvertisementController {
     }
 
     @PutMapping(path = "/{id}", produces = "application/json")
-    public Advertisement updateById(@PathVariable("id") Long id, @RequestBody @Valid Advertisement updatedAdvertisement) {
-        if (updatedAdvertisement.getId() != null && !updatedAdvertisement.getId().equals(id)) {
+    public Advertisement updateById(@PathVariable("id") Long id, @RequestBody @Valid Advertisement advertisement) {
+        if (advertisement.getId() != null && !advertisement.getId().equals(id)) {
             String message = String
                     .format("Remove 'id' property from request make it match the resource URI with id = %d", id);
             throw new BadRequestException(message);
@@ -102,8 +101,10 @@ public class AdvertisementController {
         if (!advertisementRepository.exists(id)) {
             throw new NotFoundException("No such id: " + id);
         }
-        updatedAdvertisement.setId(id);
-        return advertisementRepository.save(updatedAdvertisement);
+        advertisement.setId(id);
+        Advertisement updatedAd = advertisementRepository.save(advertisement);
+        logger.info(technicalMarker, "Updated advertisement, version {}", updatedAd.getVersion());
+        return updatedAd;
     }
 
     @DeleteMapping("/{id}")
