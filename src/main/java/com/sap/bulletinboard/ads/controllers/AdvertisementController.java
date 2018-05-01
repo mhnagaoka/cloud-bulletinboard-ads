@@ -52,7 +52,7 @@ public class AdvertisementController {
     public Advertisement advertisementById(@Min(0) @PathVariable("id") Long id) {
         Advertisement ad = advertisementRepository.findOne(id);
         if (ad != null) {
-            logger.info("Retrieving advertisement: id={}", id);
+            logger.info("Retrieving advertisement: {}", ad);
             return ad;
         }
         throw new NotFoundException("No such ad: " + id);

@@ -73,4 +73,15 @@ public class Advertisement {
     protected Timestamp now() {                       // use java.sql.Timestamp
         return new Timestamp((new Date()).getTime()); // use java.util.Date
     }
+
+    @Override
+    public String toString() {
+        return "Advertisement{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", version=" + version +
+                '}';
+    }
 }
