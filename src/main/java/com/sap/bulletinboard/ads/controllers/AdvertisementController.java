@@ -3,6 +3,7 @@ package com.sap.bulletinboard.ads.controllers;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.bulletinboard.ads.models.Advertisement;
 import com.sap.bulletinboard.ads.models.AdvertisementRepository;
+import com.sap.hcp.cf.logging.common.customfields.CustomField;
 import org.slf4j.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -78,7 +79,11 @@ public class AdvertisementController {
                 throw new BadRequestException(message);
             }
             Advertisement createdAd = advertisementRepository.save(advertisement);
+
             logger.info(technicalMarker, "Created advertisement, version {}", createdAd.getVersion());
+            logger.info("demonstration of custom fields, not part of message", CustomField.customField("example-key", "example-value"));
+            logger.info("demonstration of custom fields, part of message: {}", CustomField.customField("example-key", "example-value"));
+
             UriComponents uriComponents = uriComponentsBuilder.path(PATH + "/{id}").buildAndExpand(createdAd.getId());
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(new URI(uriComponents.getPath()));
