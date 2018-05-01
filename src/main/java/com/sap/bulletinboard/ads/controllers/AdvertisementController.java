@@ -5,6 +5,7 @@ import com.sap.bulletinboard.ads.models.Advertisement;
 import com.sap.bulletinboard.ads.models.AdvertisementRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +44,7 @@ public class AdvertisementController {
     @GetMapping
     public ResponseEntity<AdvertisementList> advertisements(@RequestParam(value = "pageId", defaultValue = "0") final int pageId,
                                             @RequestParam(value = "pageSize", defaultValue = "5") final int pageSize) {
+        MDC.put("endpoint", PATH);
         Pageable pageable = new PageRequest(pageId, pageSize);
         Page<Advertisement> page = advertisementRepository.findAll(pageable);
         return new ResponseEntity<>(new AdvertisementList(page), buildLinkHeader(page, PATH), HttpStatus.OK);
@@ -50,6 +52,7 @@ public class AdvertisementController {
 
     @GetMapping("/{id}")
     public Advertisement advertisementById(@Min(0) @PathVariable("id") Long id) {
+        MDC.put("endpoint", PATH + "/" + id);
         Advertisement ad = advertisementRepository.findOne(id);
         if (ad != null) {
             logger.info("Retrieving advertisement: {}", ad);
