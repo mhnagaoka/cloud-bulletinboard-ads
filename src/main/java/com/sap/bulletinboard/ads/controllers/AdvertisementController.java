@@ -55,7 +55,9 @@ public class AdvertisementController {
             logger.info("Retrieving advertisement: {}", ad);
             return ad;
         }
-        throw new NotFoundException("No such ad: " + id);
+        NotFoundException notFoundException = new NotFoundException("No such ad: " + id);
+        logger.warn("Advertisement not found", notFoundException);
+        throw notFoundException;
     }
 
     /**
