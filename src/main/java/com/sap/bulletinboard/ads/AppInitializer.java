@@ -4,6 +4,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import com.sap.hcp.cf.logging.servlet.filter.RequestLoggingFilter;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -30,6 +31,9 @@ public class AppInitializer implements WebApplicationInitializer {
         dispatcher.addMapping(MAPPING_URL);
 
         servletContext.addListener(new ContextLoaderListener(applicationContext));
+
+        // register logging servlet filter which logs HTTP request processing details
+        servletContext.addFilter("RequestLoggingFilter", RequestLoggingFilter.class).addMappingForUrlPatterns(null, false, "/*");
     }
 
     /**

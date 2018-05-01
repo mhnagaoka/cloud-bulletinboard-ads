@@ -3,6 +3,8 @@ package com.sap.bulletinboard.ads.controllers;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.bulletinboard.ads.models.Advertisement;
 import com.sap.bulletinboard.ads.models.AdvertisementRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ public class AdvertisementController {
     public static final String PATH = "/api/v1/ads";
 
     private AdvertisementRepository advertisementRepository;
+    Logger logger = LoggerFactory.getLogger(getClass());
 
     @Inject
     public AdvertisementController(AdvertisementRepository advertisementRepository) {
@@ -49,6 +52,7 @@ public class AdvertisementController {
     public Advertisement advertisementById(@Min(0) @PathVariable("id") Long id) {
         Advertisement ad = advertisementRepository.findOne(id);
         if (ad != null) {
+            logger.info("Retrieving advertisement: id={}", id);
             return ad;
         }
         throw new NotFoundException("No such ad: " + id);
