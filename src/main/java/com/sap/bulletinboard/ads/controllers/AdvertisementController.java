@@ -3,6 +3,7 @@ package com.sap.bulletinboard.ads.controllers;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.bulletinboard.ads.models.Advertisement;
 import com.sap.bulletinboard.ads.models.AdvertisementRepository;
+import com.sap.bulletinboard.ads.services.UserServiceClient;
 import com.sap.hcp.cf.logging.common.customfields.CustomField;
 import org.slf4j.*;
 import org.springframework.data.domain.Page;
@@ -34,11 +35,14 @@ public class AdvertisementController {
     public static final Marker technicalMarker = MarkerFactory.getMarker("TECHNICAL");
 
     private AdvertisementRepository advertisementRepository;
+    private UserServiceClient userServiceClient;
+
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Inject
-    public AdvertisementController(AdvertisementRepository advertisementRepository) {
+    public AdvertisementController(AdvertisementRepository advertisementRepository, UserServiceClient userServiceClient) {
         this.advertisementRepository = advertisementRepository;
+        this.userServiceClient = userServiceClient;
     }
 
     @GetMapping
@@ -72,7 +76,11 @@ public class AdvertisementController {
                                              UriComponentsBuilder uriComponentsBuilder) {
 
         try {
-
+            if (!userServiceClient.isPremiumUser("42")) {
+                String message = "You need to be a premium user to create an advertisement";
+                logger.warn(message);
+                throw new NotAuthorizedException(message);
+            }
             if (advertisement.getId() != null) {
                 String message = String
                         .format("Remove 'id' property from request or use PUT method to update resource with id = %d", advertisement.getId());
