@@ -192,6 +192,18 @@
 		    <version>1.4.184</version>
 		    <scope>test</scope>
 		</dependency>
+		<!-- Apache HTTP Client (closeable, configurable) -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.2</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>bulletinboard-ads</finalName>
