@@ -2,6 +2,8 @@ package com.sap.bulletinboard.ads.services;
 
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandKey;
+import com.netflix.hystrix.HystrixCommandProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,9 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
     private RestTemplate restTemplate;
 
     public GetUserCommand(String url, RestTemplate restTemplate) {
-        super(HystrixCommandGroupKey.Factory.asKey("User"), DEFAULT_TIMEOUT_MS);
+        super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("User"))
+                .andCommandKey(HystrixCommandKey.Factory.asKey("User.getById"))
+                .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionTimeoutInMilliseconds(DEFAULT_TIMEOUT_MS)));
         this.url = url;
         this.restTemplate = restTemplate;
     }
