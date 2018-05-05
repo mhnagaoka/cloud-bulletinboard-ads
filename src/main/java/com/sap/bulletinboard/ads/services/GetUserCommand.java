@@ -27,13 +27,17 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
         logger.info("sending request {}", url);
 
         try {
-            ResponseEntity<UserServiceClient.User> responseEntity = restTemplate.getForEntity(url, UserServiceClient.User.class);
+            ResponseEntity<UserServiceClient.User> responseEntity = sendRequest();
             logger.info("received response, status code: {}", responseEntity.getStatusCode());
             return responseEntity.getBody();
         } catch(HttpStatusCodeException error) {
             logger.error("received HTTP status code: {}", error.getStatusCode());
             throw error;
         }
+    }
+
+    protected ResponseEntity<UserServiceClient.User> sendRequest() {
+        return restTemplate.getForEntity(url, UserServiceClient.User.class);
     }
 
     // this will be used in exercise 18
