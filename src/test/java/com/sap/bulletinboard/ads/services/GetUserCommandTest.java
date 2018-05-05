@@ -35,20 +35,20 @@ public class GetUserCommandTest {
         assertThat(user, is(USER));
     }
 
-//    @Test
-//    public void responseTimedOutFallback() {
-//        TestableUserCommand command = new TestableUserCommand().provokeTimeout();
-//        User user = command.execute();
-//        assertThat(user, is(not(USER)));
-//    }
-//
-//    @Test
-//    public void responseErrorFallback() {
-//        TestableUserCommand command = new TestableUserCommand().respondWithError();
-//        User user = command.execute();
-//        assertThat(user, is(not(USER)));
-//    }
-//
+    @Test
+    public void responseTimedOutFallback() {
+        TestableUserCommand command = new TestableUserCommand().provokeTimeout();
+        User user = command.execute();
+        assertThat(user, is(not(USER)));
+    }
+
+    @Test
+    public void responseErrorFallback() {
+        TestableUserCommand command = new TestableUserCommand().respondWithError();
+        User user = command.execute();
+        assertThat(user, is(not(USER)));
+    }
+
 //    @Test(expected = HystrixBadRequestException.class)
 //    public void responseHystrixBadRequest() {
 //        TestableUserCommand command = new TestableUserCommand().respondWithBadRequest();

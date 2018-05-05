@@ -36,6 +36,23 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
         }
     }
 
+    @Override
+    protected UserServiceClient.User getFallback() {
+        if (isResponseTimedOut()) {
+            logger.error("execution timed out after {} ms (HystrixCommandKey:{})", getTimeoutInMs(),
+                    this.getCommandKey().name());
+        }
+        if (isFailedExecution()) {
+            logger.error("execution failed", getFailedExecutionException());
+        }
+        if (isResponseRejected()) {
+            logger.warn("request was rejected");
+        }
+        UserServiceClient.User fallbackUser = new UserServiceClient.User();
+        fallbackUser.premiumUser = false;
+        return fallbackUser;
+    }
+
     protected ResponseEntity<UserServiceClient.User> sendRequest() {
         return restTemplate.getForEntity(url, UserServiceClient.User.class);
     }
