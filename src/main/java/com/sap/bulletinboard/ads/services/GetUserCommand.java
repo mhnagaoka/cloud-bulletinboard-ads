@@ -19,7 +19,6 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
     // Hystrix uses a default timeout of 1000 ms, increase in case you run into problems in remote locations
     private static final int DEFAULT_TIMEOUT_MS = 1000;
     private final Supplier<UserServiceClient.User> fallbackFunction;
-    private final String correlationId;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private String url;
@@ -32,12 +31,10 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
         this.url = url;
         this.restTemplate = restTemplate;
         this.fallbackFunction = fallbackFunction;
-        this.correlationId = LogContext.getCorrelationId();
     }
 
     @Override
     protected UserServiceClient.User run() throws Exception {
-        LogContext.initializeContext(this.correlationId);
         logger.info("sending request {}", url);
 
         try {

@@ -4,6 +4,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import com.netflix.hystrix.strategy.HystrixPlugins;
+import com.netflix.hystrix.strategy.concurrency.HystrixConcurrencyStrategy;
+import com.netflix.hystrix.strategy.concurrency.HystrixContextCallable;
+import com.sap.hcp.cf.logging.common.LogContext;
 import com.sap.hcp.cf.logging.servlet.filter.RequestLoggingFilter;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
@@ -12,6 +16,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 
 import com.sap.bulletinboard.ads.config.WebAppContextConfig;
+
+import java.util.concurrent.Callable;
 
 public class AppInitializer implements WebApplicationInitializer {
 
@@ -34,6 +40,18 @@ public class AppInitializer implements WebApplicationInitializer {
 
         // register logging servlet filter which logs HTTP request processing details
         servletContext.addFilter("RequestLoggingFilter", RequestLoggingFilter.class).addMappingForUrlPatterns(null, false, "/*");
+
+        // Trick to propagate the correlation id to Hystrix's threads
+        HystrixPlugins.getInstance().registerConcurrencyStrategy(new HystrixConcurrencyStrategy() {
+            @Override
+            public <T> Callable<T> wrapCallable(Callable<T> callable) {
+                final String correlationId = LogContext.getCorrelationId();
+                return () -> {
+                    LogContext.initializeContext(correlationId);
+                    return callable.call();
+                };
+            }
+        });
     }
 
     /**
