@@ -8,6 +8,9 @@ import com.netflix.hystrix.exception.HystrixBadRequestException;
 import com.sap.hcp.cf.logging.common.LogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -66,7 +69,10 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
     }
 
     protected ResponseEntity<UserServiceClient.User> sendRequest() {
-        return restTemplate.getForEntity(url, UserServiceClient.User.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(com.sap.hcp.cf.logging.common.HttpHeaders.CORRELATION_ID, LogContext.getCorrelationId());
+        HttpEntity<UserServiceClient.User> request = new HttpEntity<>(headers);
+        return restTemplate.exchange(url, HttpMethod.GET, request, UserServiceClient.User.class);
     }
 
     // this will be used in exercise 18
