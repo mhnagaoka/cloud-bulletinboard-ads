@@ -3,6 +3,7 @@ package com.sap.bulletinboard.ads.services;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import com.netflix.hystrix.exception.HystrixBadRequestException;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -49,16 +50,16 @@ public class GetUserCommandTest {
         assertThat(user, is(not(USER)));
     }
 
-//    @Test(expected = HystrixBadRequestException.class)
-//    public void responseHystrixBadRequest() {
-//        TestableUserCommand command = new TestableUserCommand().respondWithBadRequest();
-//        User user = null;
-//        try {
-//            user = command.execute();
-//        } finally {
-//            assertThat(user, is(nullValue())); // fallback is not be called in case of HystrixBadRequestException
-//        }
-//    }
+    @Test(expected = HystrixBadRequestException.class)
+    public void responseHystrixBadRequest() {
+        TestableUserCommand command = new TestableUserCommand().respondWithBadRequest();
+        User user = null;
+        try {
+            user = command.execute();
+        } finally {
+            assertThat(user, is(nullValue())); // fallback is not be called in case of HystrixBadRequestException
+        }
+    }
 
     // useful for optional exercise step
     private User dummyUser() {

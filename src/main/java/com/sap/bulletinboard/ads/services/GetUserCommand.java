@@ -4,10 +4,12 @@ import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.exception.HystrixBadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
@@ -34,9 +36,12 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
             ResponseEntity<UserServiceClient.User> responseEntity = sendRequest();
             logger.info("received response, status code: {}", responseEntity.getStatusCode());
             return responseEntity.getBody();
-        } catch(HttpStatusCodeException error) {
-            logger.error("received HTTP status code: {}", error.getStatusCode());
+        } catch(HttpServerErrorException error) {
+            logger.warn("received HTTP status code: {}", error.getStatusCode());
             throw error;
+        } catch(HttpClientErrorException error) {
+            logger.error("received HTTP status code: {}", error.getStatusCode());
+            throw new HystrixBadRequestException("Unsuccessful outgoing request", error);
         }
     }
 
