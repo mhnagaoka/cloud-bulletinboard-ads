@@ -28,7 +28,7 @@ public class UserServiceClient {
     public boolean isPremiumUser(String id) throws RuntimeException {
         try {
             String url = userServiceRoute + "/" + PATH + "/" + id;
-            User user = new GetUserCommand(url, restTemplate).execute();
+            User user = new GetUserCommand(url, restTemplate, User::new).execute();
             return user.premiumUser;
         } catch (HystrixRuntimeException ex) {
             logger.warn("[HystrixFailure:" + ex.getFailureType().toString() + "] " + ex.getMessage());

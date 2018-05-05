@@ -15,6 +15,8 @@ import org.springframework.web.client.RestClientException;
 import com.netflix.hystrix.Hystrix;
 import com.sap.bulletinboard.ads.services.UserServiceClient.User;
 
+import java.util.function.Supplier;
+
 /**
  * This is a learning test for Hystrix and to test the GetUserCommand implementation.
  */
@@ -24,35 +26,35 @@ public class GetUserCommandTest {
 
     @Test
     public void responseReturnedSynchronously() {
-        TestableUserCommand command = new TestableUserCommand().respondWithOkUser();
+        TestableUserCommand command = new TestableUserCommand(this::dummyUser).respondWithOkUser();
         User user = command.execute();
         assertThat(user, is(USER));
     }
 
     @Test
     public void responseReturnedAsynchronously() throws Exception {
-        TestableUserCommand command = new TestableUserCommand().respondWithOkUser();
+        TestableUserCommand command = new TestableUserCommand(this::dummyUser).respondWithOkUser();
         User user = command.queue().get();
         assertThat(user, is(USER));
     }
 
     @Test
     public void responseTimedOutFallback() {
-        TestableUserCommand command = new TestableUserCommand().provokeTimeout();
+        TestableUserCommand command = new TestableUserCommand(this::dummyUser).provokeTimeout();
         User user = command.execute();
         assertThat(user, is(not(USER)));
     }
 
     @Test
     public void responseErrorFallback() {
-        TestableUserCommand command = new TestableUserCommand().respondWithError();
+        TestableUserCommand command = new TestableUserCommand(this::dummyUser).respondWithError();
         User user = command.execute();
         assertThat(user, is(not(USER)));
     }
 
     @Test(expected = HystrixBadRequestException.class)
     public void responseHystrixBadRequest() {
-        TestableUserCommand command = new TestableUserCommand().respondWithBadRequest();
+        TestableUserCommand command = new TestableUserCommand(this::dummyUser).respondWithBadRequest();
         User user = null;
         try {
             user = command.execute();
@@ -78,8 +80,8 @@ public class GetUserCommandTest {
         private boolean provokeTimeout;
         private RestClientException exception;
 
-        TestableUserCommand() {
-            super("", null);
+        TestableUserCommand(Supplier<User> fallbackFunction) {
+            super("", null, fallbackFunction);
         }
 
         TestableUserCommand respondWithOkUser() {

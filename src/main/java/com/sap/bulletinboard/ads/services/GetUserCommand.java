@@ -12,20 +12,24 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.function.Supplier;
+
 public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
     // Hystrix uses a default timeout of 1000 ms, increase in case you run into problems in remote locations
     private static final int DEFAULT_TIMEOUT_MS = 1000;
+    private final Supplier<UserServiceClient.User> fallbackFunction;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private String url;
     private RestTemplate restTemplate;
 
-    public GetUserCommand(String url, RestTemplate restTemplate) {
+    public GetUserCommand(String url, RestTemplate restTemplate, Supplier<UserServiceClient.User> fallbackFunction) {
         super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("User"))
                 .andCommandKey(HystrixCommandKey.Factory.asKey("User.getById"))
                 .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionTimeoutInMilliseconds(DEFAULT_TIMEOUT_MS)));
         this.url = url;
         this.restTemplate = restTemplate;
+        this.fallbackFunction = fallbackFunction;
     }
 
     @Override
@@ -57,9 +61,7 @@ public class GetUserCommand extends HystrixCommand<UserServiceClient.User> {
         if (isResponseRejected()) {
             logger.warn("request was rejected");
         }
-        UserServiceClient.User fallbackUser = new UserServiceClient.User();
-        fallbackUser.premiumUser = false;
-        return fallbackUser;
+        return fallbackFunction.get();
     }
 
     protected ResponseEntity<UserServiceClient.User> sendRequest() {
