@@ -1,6 +1,6 @@
 package com.sap.bulletinboard.ads.services;
 
-import com.sap.hcp.cf.logging.common.LogContext;
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -12,19 +12,18 @@ import javax.inject.Inject;
 public class StatisticsServiceClient {
 
     private AmqpTemplate rabbitTemplate;
-    private final Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Inject
     public StatisticsServiceClient(AmqpTemplate amqpTemplate) {
         this.rabbitTemplate = amqpTemplate;
-        this.logger = LoggerFactory.getLogger(getClass());
     }
 
     public void advertisementIsShown(long id) {
-        logger.info("Updating statistics for ad: {}", id);
-        rabbitTemplate.convertAndSend(null, "statistics.adIsShown", String.valueOf(id), message -> {
-            message.getMessageProperties().setCorrelationId(LogContext.getCorrelationId());
-            return message;
-        });
+        try {
+            new UpdateStatisticsCommand(id, rabbitTemplate).queue();
+        } catch (HystrixRuntimeException ex) {
+            logger.warn("[HystrixFailure:" + ex.getFailureType().toString() + "] " + ex.getMessage());
+        }
     }
 }
