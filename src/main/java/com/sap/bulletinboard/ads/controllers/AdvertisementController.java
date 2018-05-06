@@ -3,6 +3,7 @@ package com.sap.bulletinboard.ads.controllers;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sap.bulletinboard.ads.models.Advertisement;
 import com.sap.bulletinboard.ads.models.AdvertisementRepository;
+import com.sap.bulletinboard.ads.services.StatisticsServiceClient;
 import com.sap.bulletinboard.ads.services.UserServiceClient;
 import com.sap.hcp.cf.logging.common.customfields.CustomField;
 import org.slf4j.*;
@@ -36,13 +37,16 @@ public class AdvertisementController {
 
     private AdvertisementRepository advertisementRepository;
     private UserServiceClient userServiceClient;
+    private final StatisticsServiceClient statisticsServiceClient;
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Inject
-    public AdvertisementController(AdvertisementRepository advertisementRepository, UserServiceClient userServiceClient) {
+    public AdvertisementController(AdvertisementRepository advertisementRepository, UserServiceClient userServiceClient,
+                                   StatisticsServiceClient statisticsServiceClient) {
         this.advertisementRepository = advertisementRepository;
         this.userServiceClient = userServiceClient;
+        this.statisticsServiceClient = statisticsServiceClient;
     }
 
     @GetMapping
@@ -60,6 +64,7 @@ public class AdvertisementController {
         Advertisement ad = advertisementRepository.findOne(id);
         if (ad != null) {
             logger.info("Retrieving advertisement: {}", ad);
+            statisticsServiceClient.advertisementIsShown(id);
             return ad;
         }
         NotFoundException notFoundException = new NotFoundException("No such ad: " + id);
