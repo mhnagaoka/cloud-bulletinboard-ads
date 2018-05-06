@@ -2,21 +2,26 @@ package com.sap.bulletinboard.ads.config;
 
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.config.java.AbstractCloudConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
 
 @Configuration
 @Profile("cloud")
 public class CloudRabbitConfig extends AbstractCloudConfig {
 
     public static final String STATISTICS_ROUTING_KEY = "statistics.adIsShown";
+    public static final String PERIODICAL_STATISTICS_ROUTING_KEY = "statistics.periodicalStatistics";
 
     /**
      * Parses the local environment variable VCAP_SERVICES (containing cloud information) and provides a
@@ -41,6 +46,7 @@ public class CloudRabbitConfig extends AbstractCloudConfig {
     public AmqpAdmin amqpAdmin(ConnectionFactory connectionFactory) {
         RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
         rabbitAdmin.declareQueue(new Queue(STATISTICS_ROUTING_KEY)); // creates queue, if not existing
+        rabbitAdmin.declareQueue(new Queue(PERIODICAL_STATISTICS_ROUTING_KEY));
         return rabbitAdmin;
     }
 
@@ -55,4 +61,19 @@ public class CloudRabbitConfig extends AbstractCloudConfig {
         return rabbitTemplate;
     }
 
+    @Bean
+    public SimpleMessageListenerContainer pushMessageContainer(
+            @Qualifier("statisticsListener") final MessageListener messageListener,
+            ConnectionFactory connectionFactory) {
+
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
+
+        container.setQueueNames(PERIODICAL_STATISTICS_ROUTING_KEY);
+        container.setPrefetchCount(20);// limit number of unacknowledged messages for a particular channel (creates backpressure to RabbitMQ)
+        container.setDefaultRequeueRejected(false); // to prevent requeuing in case of exception
+        container.setMessageListener(messageListener); // registers StatisticsListener
+        container.setAutoStartup(true);
+
+        return container;
+    }
 }
