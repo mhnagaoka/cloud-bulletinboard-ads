@@ -14,3 +14,4 @@ applications:
   services:
     - postgres-bulletinboard-ads
     - applogs-bulletinboard
+    - mq-bulletinboard
