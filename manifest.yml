@@ -3,7 +3,7 @@ applications:
 - name: bulletinboard-ads
   health-check-type: http
   health-check-http-endpoint: /health
-  memory: 1G
+  memory: 768M
   path: target/bulletinboard-ads.war
   buildpack: https://github.com/cloudfoundry/java-buildpack.git#v4.9
   env:
@@ -15,3 +15,20 @@ applications:
     - postgres-bulletinboard-ads
     - applogs-bulletinboard
     - mq-bulletinboard
+- name: approuter
+  host: approuter-i866074
+  path: src/main/approuter
+  buildpack: https://github.com/cloudfoundry/nodejs-buildpack.git#v1.6.10
+  memory: 128M
+  env:
+    XSAPPNAME: bulletinboard-i866074
+    TENANT_HOST_PATTERN: "^(.*)-approuter-i866074.cfapps.eu10.hana.ondemand.com"
+    destinations: >
+      [
+        {"name":"ads-destination",
+         "url":"https://bulletinboard-ads-i866074.cfapps.eu10.hana.ondemand.com",
+         "forwardAuthToken": true}
+      ]
+  services:
+    - applogs-bulletinboard
+    - uaa-bulletinboard
